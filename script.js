@@ -134,10 +134,16 @@ const GameController = (function(board) {
             }
         }
     }
+
+    function getCurrentPlayer() {
+        return currentPlayer
+    }
+
     return {
         playTurn,
         player1,
-        player2
+        player2,
+        getCurrentPlayer
     }
 })(Board)
 
@@ -163,8 +169,9 @@ const DomRenderer = (function(board, gameController) {
     });
     
     function renderBoard() {
-        const gameGrid = document.querySelector(".game-grid");
-        gameGrid.innerHTML = "";
+        const gameGrid = document.querySelector(".game-grid")
+        gameGrid.innerHTML = ""
+        highlightCurrentPlayer()
         for(let row = 0; row < 3; row++) {
             for(let col = 0; col < 3; col++) {
                 const cell = document.createElement("div");
@@ -174,6 +181,7 @@ const DomRenderer = (function(board, gameController) {
                 cell.setAttribute("col", col)
                 cell.addEventListener("click", event => {
                     const result = gameController.playTurn(row, col)
+                    highlightCurrentPlayer()
                     event.target.textContent = board.get(row, col)
                     if(result !== undefined) {
                         renderPlayerScore()
@@ -190,6 +198,19 @@ const DomRenderer = (function(board, gameController) {
         const player2Score = document.querySelector(".player-2 .score");
         player1Score.textContent = gameController.player1.getScore()
         player2Score.textContent = gameController.player2.getScore()
+    }
+
+    function highlightCurrentPlayer() {
+        const player1 = document.querySelector(".player-1");
+        const player2 = document.querySelector(".player-2");
+
+        if(gameController.getCurrentPlayer() === gameController.player1) {
+            player1.style.borderLeftColor = 'orange';
+            player2.style.borderLeftColor = 'lightgray'
+        } else {
+            player1.style.borderLeftColor = 'lightgray';
+            player2.style.borderLeftColor = 'orange'
+        }
     }
 
     return {

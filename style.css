@@ -31,7 +31,14 @@
 .player-1, .player-2 {
     display: flex;
     gap: 20px;
+    flex: 1;
     margin-right: auto;
+    width: 100%;
+    padding: 10px;
+
+    border-left-style: solid;
+    border-left-width: 5px;
+    border-left-color: lightgray;
 }
 
 .player-1 .name, .player-2 .name {
