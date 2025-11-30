@@ -114,11 +114,9 @@ function createPlayer(name, marker) {
     }
 }
 
-const player1 = createPlayer('Player 1', 'X')
-const player2 = createPlayer('Player 2', 'O')
-
-const GameController = (function(board, player1, player2) {
-
+const GameController = (function(board) {
+    const player1 = createPlayer('Player 1', 'X')
+    const player2 = createPlayer('Player 2', 'O')
     let currentPlayer = player1
     
     function playTurn(row, col) {
@@ -137,16 +135,36 @@ const GameController = (function(board, player1, player2) {
         }
     }
     return {
-        playTurn
+        playTurn,
+        player1,
+        player2
     }
-})(Board, player1, player2)
+})(Board)
 
 const DomRenderer = (function(board, gameController) {
-    const gameGrid = document.querySelector(".game-grid");
-    const player1Score = document.querySelector(".player-1 .score");
-    const player2Score = document.querySelector(".player-2 .score");
+    const player1SetNameBtn = document.querySelector(".player-1 .set-name-btn").addEventListener("click", event => {
+        const newName = prompt("Enter your name:")
+        if(newName !== "" && newName !== null) {
+            console.log(newName)
+            gameController.player1.name = newName
+            document.querySelector(".player-1 .name").textContent = newName
+        }
+    });
+    const player2SetNameBtn = document.querySelector(".player-2 .set-name-btn").addEventListener("click", event => {
+        const newName = prompt("Enter your name:")
+        if(newName !== "" && newName !== null) {
+            gameController.player2.name = newName
+            document.querySelector(".player-2 .name").textContent = newName
+        }
+    });
+    const resetGameBtn = document.querySelector(".reset-game-btn").addEventListener("click", event => {
+        board.reset()
+        renderBoard()
+    });
     
     function renderBoard() {
+        const gameGrid = document.querySelector(".game-grid");
+        gameGrid.innerHTML = "";
         for(let row = 0; row < 3; row++) {
             for(let col = 0; col < 3; col++) {
                 const cell = document.createElement("div");
@@ -158,6 +176,7 @@ const DomRenderer = (function(board, gameController) {
                     const result = gameController.playTurn(row, col)
                     event.target.textContent = board.get(row, col)
                     if(result !== undefined) {
+                        renderPlayerScore()
                         alert(result)
                     }
                 })
@@ -166,8 +185,16 @@ const DomRenderer = (function(board, gameController) {
         }
     }
 
+    function renderPlayerScore() {
+        const player1Score = document.querySelector(".player-1 .score");
+        const player2Score = document.querySelector(".player-2 .score");
+        player1Score.textContent = gameController.player1.getScore()
+        player2Score.textContent = gameController.player2.getScore()
+    }
+
     return {
         renderBoard,
+        renderPlayerScore
     }
 })(Board, GameController)
 

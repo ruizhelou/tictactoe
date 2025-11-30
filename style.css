@@ -8,20 +8,36 @@
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;
 
-    border-style: solid;
+    /* border-style: solid;
     border-width: 1px;
-    border-color: red;
+    border-color: red; */
 }
 
-.conatiner, .header {
+.conatiner, .header, .player-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 10px;
+}
+
+.conatiner {
+    margin: 40px 0px 40px 0px;
+}
+
+.header .title {
+    font-size: 2rem;
 }
 
 .player-1, .player-2 {
     display: flex;
     gap: 20px;
+    margin-right: auto;
+}
+
+.player-1 .name, .player-2 .name {
+    border-bottom-style: solid;
+    border-bottom-color: black;
+    border-bottom-width: 1px;
 }
 
 .game-grid {
@@ -36,8 +52,23 @@
     align-items: center;
     font-size: var(--cell-size);
     font-family: Verdana, sans-serif;
+
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
 }
 
 .cell:hover {
     box-shadow: inset 0 0 10px lightgray;
+}
+
+button {
+    font-size: 1rem;
+    border-radius: 15px;
+    padding: 10px 15px;
+    border-style: none;
+}
+
+button:hover {
+    opacity: 0.5;
 }
