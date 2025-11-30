@@ -127,7 +127,7 @@ const GameController = (function(board) {
                     currentPlayer.incrementScore()
                     return `${currentPlayer.name} victory!`
                 } else if(board.isFull()) {
-                    return "It's a tie!"
+                    return "It's a draw!"
                 } else {
                     currentPlayer = currentPlayer === player1 ? player2 : player1
                 }
