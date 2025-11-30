@@ -17,11 +17,11 @@ const Board = (function() {
         return row < 0 || row >= board.length || col < 0 || col >= board[row].length
     }
 
-    function placeMarker(row, col, marker) {
+    function put(row, col, value) {
         if(isOutOfBounds(row, col) || board[row][col] !== null) {
             return false
         }
-        board[row][col] = marker
+        board[row][col] = value
         return true
     }
 
@@ -75,12 +75,19 @@ const Board = (function() {
         return true
     }
 
+    function get(row, col) {
+        if(isOutOfBounds(row, col)) {
+            return null
+        }
+        return board[row][col]
+    }
+
     return {
         reset,
-        placeMarker,
+        put,
         hasWinner,
         isFull,
-        board
+        get
     }
 })()
 
@@ -110,30 +117,58 @@ function createPlayer(name, marker) {
 const player1 = createPlayer('Player 1', 'X')
 const player2 = createPlayer('Player 2', 'O')
 
-const Game = (function(board, player1, player2) {
+const GameController = (function(board, player1, player2) {
 
     let currentPlayer = player1
     
     function playTurn(row, col) {
-        const validMove = board.placeMarker(row, col, currentPlayer.getMarker())
-        console.log(board.board)
-        if(validMove) {
-            if(board.hasWinner()) {
-                currentPlayer.incrementScore()
-                board.reset()
-                console.log(currentPlayer.name + " won. Score: " + currentPlayer.getScore())
-            } else if(board.isFull()) {
-                board.reset()
-                console.log('tie')
-            } else {
-                currentPlayer = currentPlayer === player1 ? player2 : player1
+        if(!board.hasWinner()) {
+            const validMove = board.put(row, col, currentPlayer.getMarker())
+            if(validMove) {
+                if(board.hasWinner()) {
+                    currentPlayer.incrementScore()
+                    return `${currentPlayer.name} victory!`
+                } else if(board.isFull()) {
+                    return "It's a tie!"
+                } else {
+                    currentPlayer = currentPlayer === player1 ? player2 : player1
+                }
             }
-        } else {
-            console.log("Invalid move")
         }
     }
-
     return {
         playTurn
     }
 })(Board, player1, player2)
+
+const DomRenderer = (function(board, gameController) {
+    const gameGrid = document.querySelector(".game-grid");
+    const player1Score = document.querySelector(".player-1 .score");
+    const player2Score = document.querySelector(".player-2 .score");
+    
+    function renderBoard() {
+        for(let row = 0; row < 3; row++) {
+            for(let col = 0; col < 3; col++) {
+                const cell = document.createElement("div");
+                cell.textContent = board.get(row, col);
+                cell.classList.add("cell")
+                cell.setAttribute("row", row)
+                cell.setAttribute("col", col)
+                cell.addEventListener("click", event => {
+                    const result = gameController.playTurn(row, col)
+                    event.target.textContent = board.get(row, col)
+                    if(result !== undefined) {
+                        alert(result)
+                    }
+                })
+                gameGrid.appendChild(cell);
+            }
+        }
+    }
+
+    return {
+        renderBoard,
+    }
+})(Board, GameController)
+
+DomRenderer.renderBoard()
