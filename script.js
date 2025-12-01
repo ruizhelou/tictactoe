@@ -1,73 +1,73 @@
-const Board = (function() {
-    const board = [
+class Board {
+    #board = [
         [null, null, null],
         [null, null, null],
         [null, null, null],
     ]
 
-    function reset() {
-        for(let row = 0; row < board.length; row++) {
-            for(let col = 0; col < board[row].length; col++) {
-                board[row][col] = null
+    reset() {
+        for(let row = 0; row < this.#board.length; row++) {
+            for(let col = 0; col < this.#board[row].length; col++) {
+                this.#board[row][col] = null
             }
         }
     }
 
-    function isOutOfBounds(row, col) {
-        return row < 0 || row >= board.length || col < 0 || col >= board[row].length
+    #isOutOfBounds(row, col) {
+        return row < 0 || row >= this.#board.length || col < 0 || col >= this.#board[row].length
     }
 
-    function put(row, col, value) {
-        if(isOutOfBounds(row, col) || board[row][col] !== null) {
+    put(row, col, value) {
+        if(this.#isOutOfBounds(row, col) || this.#board[row][col] !== null) {
             return false
         }
-        board[row][col] = value
+        this.#board[row][col] = value
         return true
     }
 
-    function isRowEqual(row) {
-        return board[row].every(col => col === board[row][0] && col !== null);
+    #isRowEqual(row) {
+        return this.#board[row].every(col => col === this.#board[row][0] && col !== null);
     }
 
-    function isColEqual(col) {
-        return board.every(row => row[col] === board[0][col] && row[col] !== null)
+    #isColEqual(col) {
+        return this.#board.every(row => row[col] === this.#board[0][col] && row[col] !== null)
     }
 
-    function isMainDiagonalEqual() {
-        for(let i = 0; i < board.length; i++) {
-            if(board[i][i] === null || board[i][i] !== board[0][0]) {
+    #isMainDiagonalEqual() {
+        for(let i = 0; i < this.#board.length; i++) {
+            if(this.#board[i][i] === null || this.#board[i][i] !== this.#board[0][0]) {
                 return false;
             }
         }
         return true;
     }
 
-    function isAntiDiagonalEqual() {
-        for(let i = board.length - 1; i >= 0; i--) {
-            if(board[board.length - i - 1][i] === null || board[board.length - i - 1][i] !== board[0][board.length - 1]) {
+    #isAntiDiagonalEqual() {
+        for(let i = this.#board.length - 1; i >= 0; i--) {
+            if(this.#board[this.#board.length - i - 1][i] === null || this.#board[this.#board.length - i - 1][i] !== this.#board[0][this.#board.length - 1]) {
                 return false;
             }
         }
         return true
     }
 
-    function hasWinner() {
-        for(let row = 0; row < board.length; row++) {
-            if(isRowEqual(row)) return true
+    hasWinner() {
+        for(let row = 0; row < this.#board.length; row++) {
+            if(this.#isRowEqual(row)) return true
         }
-        for(let col = 0; col < board[0].length; col++) {
-            if(isColEqual(col)) return true
+        for(let col = 0; col < this.#board[0].length; col++) {
+            if(this.#isColEqual(col)) return true
         }
-        if(isMainDiagonalEqual()) return true
-        if(isAntiDiagonalEqual()) return true
+        if(this.#isMainDiagonalEqual()) return true
+        if(this.#isAntiDiagonalEqual()) return true
 
         return null
     }
 
-    function isFull() {
-        for(let row = 0; row < board.length; row++) {
-            for(let col = 0; col < board[row].length; col++) {
-                if(board[row][col] === null) {
+    isFull() {
+        for(let row = 0; row < this.#board.length; row++) {
+            for(let col = 0; col < this.#board[row].length; col++) {
+                if(this.#board[row][col] === null) {
                     return false
                 }
             }
@@ -75,53 +75,54 @@ const Board = (function() {
         return true
     }
 
-    function get(row, col) {
-        if(isOutOfBounds(row, col)) {
+    get(row, col) {
+        if(this.#isOutOfBounds(row, col)) {
             return null
         }
-        return board[row][col]
-    }
-
-    return {
-        reset,
-        put,
-        hasWinner,
-        isFull,
-        get
-    }
-})()
-
-function createPlayer(name, marker) {
-    let score = 0
-
-    function incrementScore() {
-        score++;
-    }
-
-    function getScore() {
-        return score
-    }
-
-    function getMarker() {
-        return marker
-    }
-
-    return {
-        name,
-        getMarker,
-        incrementScore,
-        getScore
+        return this.#board[row][col]
     }
 }
 
-const GameController = (function(board) {
-    const player1 = createPlayer('Player 1', 'X')
-    const player2 = createPlayer('Player 2', 'O')
+class Player {
+    #score = 0
+    #name
+    #marker
+
+    constructor(name, marker) {
+        this.#name = name
+        this.#marker = marker
+    }
+
+    get score() {
+        return this.#score;
+    }
+
+    incrementScore() {
+        this.#score++
+    }
+
+    get marker() {
+        return this.#marker
+    }
+
+    get name() {
+        return this.#name
+    }
+
+    set name(name) {
+        this.#name = name
+    }
+}
+
+const GameController = (function() {
+    const player1 = new Player('Player 1', 'X')
+    const player2 = new Player('Player 2', 'O')
+    const board = new Board()
     let currentPlayer = player1
     
     function playTurn(row, col) {
         if(!board.hasWinner()) {
-            const validMove = board.put(row, col, currentPlayer.getMarker())
+            const validMove = board.put(row, col, currentPlayer.marker)
             if(validMove) {
                 if(board.hasWinner()) {
                     currentPlayer.incrementScore()
@@ -143,11 +144,12 @@ const GameController = (function(board) {
         playTurn,
         player1,
         player2,
-        getCurrentPlayer
+        getCurrentPlayer,
+        board
     }
-})(Board)
+})()
 
-const DomRenderer = (function(board, gameController) {
+const DomRenderer = (function(gameController) {
     const player1SetNameBtn = document.querySelector(".player-1 .set-name-btn").addEventListener("click", event => {
         const newName = prompt("Enter your name:")
         if(newName !== "" && newName !== null) {
@@ -164,7 +166,7 @@ const DomRenderer = (function(board, gameController) {
         }
     });
     const resetGameBtn = document.querySelector(".reset-game-btn").addEventListener("click", event => {
-        board.reset()
+        gameController.board.reset()
         renderBoard()
     });
     
@@ -175,14 +177,14 @@ const DomRenderer = (function(board, gameController) {
         for(let row = 0; row < 3; row++) {
             for(let col = 0; col < 3; col++) {
                 const cell = document.createElement("div");
-                cell.textContent = board.get(row, col);
+                cell.textContent = gameController.board.get(row, col);
                 cell.classList.add("cell")
                 cell.setAttribute("row", row)
                 cell.setAttribute("col", col)
                 cell.addEventListener("click", event => {
                     const result = gameController.playTurn(row, col)
                     highlightCurrentPlayer()
-                    event.target.textContent = board.get(row, col)
+                    event.target.textContent = gameController.board.get(row, col)
                     if(result !== undefined) {
                         renderPlayerScore()
                         alert(result)
@@ -196,8 +198,8 @@ const DomRenderer = (function(board, gameController) {
     function renderPlayerScore() {
         const player1Score = document.querySelector(".player-1 .score");
         const player2Score = document.querySelector(".player-2 .score");
-        player1Score.textContent = gameController.player1.getScore()
-        player2Score.textContent = gameController.player2.getScore()
+        player1Score.textContent = gameController.player1.score
+        player2Score.textContent = gameController.player2.score
     }
 
     function highlightCurrentPlayer() {
@@ -217,6 +219,6 @@ const DomRenderer = (function(board, gameController) {
         renderBoard,
         renderPlayerScore
     }
-})(Board, GameController)
+})(GameController)
 
 DomRenderer.renderBoard()
