@@ -114,99 +114,85 @@ class Player {
     }
 }
 
-const GameController = (function() {
-    const player1 = new Player('Player 1', 'X')
-    const player2 = new Player('Player 2', 'O')
-    const board = new Board()
-    let currentPlayer = player1
+class GameController {
+
+    #player1 = new Player('Player 1', 'X')
+    #player2 = new Player('Player 2', 'O')
+    #board = new Board()
+    #currentPlayer = this.#player1
     
-    function playTurn(row, col) {
-        if(!board.hasWinner()) {
-            const validMove = board.put(row, col, currentPlayer.marker)
+    playTurn(row, col) {
+        if(!this.#board.hasWinner()) {
+            const validMove = this.#board.put(row, col, this.#currentPlayer.marker)
             if(validMove) {
-                if(board.hasWinner()) {
-                    currentPlayer.incrementScore()
-                    return `${currentPlayer.name} victory!`
-                } else if(board.isFull()) {
+                if(this.#board.hasWinner()) {
+                    this.#currentPlayer.incrementScore()
+                    return `${this.#currentPlayer.name} victory!`
+                } else if(this.#board.isFull()) {
                     return "It's a draw!"
                 } else {
-                    currentPlayer = currentPlayer === player1 ? player2 : player1
+                    this.#currentPlayer = this.#currentPlayer === this.#player1 ? this.#player2 : this.#player1
                 }
             }
         }
     }
 
-    function getCurrentPlayer() {
-        return currentPlayer
+    get player1() {
+        return this.#player1
     }
 
-    return {
-        playTurn,
-        player1,
-        player2,
-        getCurrentPlayer,
-        board
+    get player2() {
+        return this.#player2
     }
-})()
 
-const DomRenderer = (function(gameController) {
-    const player1SetNameBtn = document.querySelector(".player-1 .set-name-btn").addEventListener("click", event => {
+    get currentPlayer() {
+        return this.#currentPlayer
+    }
+
+    get board() {
+        return this.#board
+    }
+}
+
+class DomRenderer {
+
+    #gameController;
+
+    constructor(gameController) {
+        this.#gameController = gameController
+    }
+
+    player1SetNameBtn = document.querySelector(".player-1 .set-name-btn").addEventListener("click", event => {
         const newName = prompt("Enter your name:")
         if(newName !== "" && newName !== null) {
-            console.log(newName)
-            gameController.player1.name = newName
+            this.#gameController.player1.name = newName
             document.querySelector(".player-1 .name").textContent = newName
         }
     });
-    const player2SetNameBtn = document.querySelector(".player-2 .set-name-btn").addEventListener("click", event => {
+    player2SetNameBtn = document.querySelector(".player-2 .set-name-btn").addEventListener("click", event => {
         const newName = prompt("Enter your name:")
         if(newName !== "" && newName !== null) {
-            gameController.player2.name = newName
+            this.#gameController.player2.name = newName
             document.querySelector(".player-2 .name").textContent = newName
         }
     });
-    const resetGameBtn = document.querySelector(".reset-game-btn").addEventListener("click", event => {
-        gameController.board.reset()
-        renderBoard()
+    resetGameBtn = document.querySelector(".reset-game-btn").addEventListener("click", event => {
+        this.#gameController.board.reset()
+        this.renderBoard()
     });
-    
-    function renderBoard() {
-        const gameGrid = document.querySelector(".game-grid")
-        gameGrid.innerHTML = ""
-        highlightCurrentPlayer()
-        for(let row = 0; row < 3; row++) {
-            for(let col = 0; col < 3; col++) {
-                const cell = document.createElement("div");
-                cell.textContent = gameController.board.get(row, col);
-                cell.classList.add("cell")
-                cell.setAttribute("row", row)
-                cell.setAttribute("col", col)
-                cell.addEventListener("click", event => {
-                    const result = gameController.playTurn(row, col)
-                    highlightCurrentPlayer()
-                    event.target.textContent = gameController.board.get(row, col)
-                    if(result !== undefined) {
-                        renderPlayerScore()
-                        alert(result)
-                    }
-                })
-                gameGrid.appendChild(cell);
-            }
-        }
-    }
 
-    function renderPlayerScore() {
+    renderPlayerScore() {
         const player1Score = document.querySelector(".player-1 .score");
         const player2Score = document.querySelector(".player-2 .score");
-        player1Score.textContent = gameController.player1.score
-        player2Score.textContent = gameController.player2.score
+        player1Score.textContent = this.#gameController.player1.score
+        player2Score.textContent = this.#gameController.player2.score
     }
 
-    function highlightCurrentPlayer() {
+    highlightCurrentPlayer() {
         const player1 = document.querySelector(".player-1");
         const player2 = document.querySelector(".player-2");
 
-        if(gameController.getCurrentPlayer() === gameController.player1) {
+        if(this.#gameController === this.#gameController.player1) {
             player1.style.borderLeftColor = 'orange';
             player2.style.borderLeftColor = 'lightgray'
         } else {
@@ -214,11 +200,32 @@ const DomRenderer = (function(gameController) {
             player2.style.borderLeftColor = 'orange'
         }
     }
-
-    return {
-        renderBoard,
-        renderPlayerScore
+    
+    renderBoard() {
+        const gameGrid = document.querySelector(".game-grid")
+        gameGrid.innerHTML = ""
+        this.highlightCurrentPlayer()
+        for(let row = 0; row < 3; row++) {
+            for(let col = 0; col < 3; col++) {
+                const cell = document.createElement("div");
+                cell.textContent = this.#gameController.board.get(row, col);
+                cell.classList.add("cell")
+                cell.setAttribute("row", row)
+                cell.setAttribute("col", col)
+                cell.addEventListener("click", event => {
+                    const result = this.#gameController.playTurn(row, col)
+                    this.highlightCurrentPlayer()
+                    event.target.textContent = this.#gameController.board.get(row, col)
+                    if(result !== undefined) {
+                        this.renderPlayerScore()
+                        alert(result)
+                    }
+                })
+                gameGrid.appendChild(cell);
+            }
+        }
     }
-})(GameController)
+}
 
-DomRenderer.renderBoard()
+const domRenderer = new DomRenderer(new GameController())
+domRenderer.renderBoard()
